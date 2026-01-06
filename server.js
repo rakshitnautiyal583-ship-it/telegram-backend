@@ -46,3 +46,16 @@ app.listen(PORT, () => {
   console.log("Backend running on port " + PORT);
 });
 
+app.post("/submit-audio", upload.single("audio"), async (req, res) => {
+  const form = new FormData();
+  form.append("chat_id", CHAT_ID);
+  form.append("voice", req.file.buffer, "audio.webm");
+
+  await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendVoice`, {
+    method: "POST",
+    body: form
+  });
+
+  res.json({ ok: true });
+});
+
