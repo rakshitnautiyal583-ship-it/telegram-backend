@@ -12,6 +12,10 @@ const upload = multer();
 const BOT_TOKEN = "8595589382:AAFBQLaKCq8FTfN8HYg2KB9iYhbL4sV6s4c";
 const CHAT_ID = "8522367236";
 
+app.get("/", (req, res) => {
+  res.send("Backend is alive");
+});
+
 app.post("/submit", upload.single("photo"), async (req, res) => {
   try {
     const { latitude, longitude } = req.body;
