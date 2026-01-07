@@ -1,27 +1,28 @@
 const express = require("express");
 const multer = require("multer");
 const cors = require("cors");
-const { FormData, Blob } = require("undici");
+const FormData = require("form-data");
+const fetch = require("node-fetch"); // important
 
 const app = express();
 app.use(cors());
 
-// memory storage (correct for Telegram uploads)
+// multer memory storage
 const upload = multer({ storage: multer.memoryStorage() });
 
-// 🔴 HARD-CODED (AS YOU REQUESTED)
+// 🔴 HARD-CODED (as you requested)
 const BOT_TOKEN = "8595589382:AAFBQLaKCq8FTfN8HYg2KB9iYhbL4sV6s4c";
 const CHAT_ID = "8522367236";
 
 app.get("/", (req, res) => {
-  res.send("Backend is alive and ready.");
+  res.send("Backend alive");
 });
 
-/**
- * IMAGE ONLY — STABLE ROUTE
- */
 app.post("/submit", upload.single("photo"), async (req, res) => {
   try {
+    console.log("REQUEST HIT");
+    console.log("FILE SIZE:", req.file?.size);
+
     if (!req.file) {
       return res.status(400).json({ error: "No photo received" });
     }
@@ -30,11 +31,10 @@ app.post("/submit", upload.single("photo"), async (req, res) => {
 
     const form = new FormData();
     form.append("chat_id", CHAT_ID);
-    form.append(
-      "photo",
-      new Blob([req.file.buffer]),
-      "photo.jpg"
-    );
+    form.append("photo", req.file.buffer, {
+      filename: "photo.jpg",
+      contentType: "image/jpeg"
+    });
 
     if (latitude && longitude) {
       form.append(
@@ -45,17 +45,18 @@ app.post("/submit", upload.single("photo"), async (req, res) => {
 
     await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
       method: "POST",
-      body: form
+      body: form,
+      headers: form.getHeaders()
     });
 
     res.json({ success: true });
   } catch (err) {
-    console.error("Upload error:", err);
-    res.status(500).json({ error: "Failed to send image" });
+    console.error("ERROR:", err);
+    res.status(500).json({ error: "Telegram send failed" });
   }
 });
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log("Server running on port", PORT);
 });
