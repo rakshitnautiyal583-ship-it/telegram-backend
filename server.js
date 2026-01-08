@@ -12,7 +12,7 @@ const upload = multer({ storage: multer.memoryStorage() });
 
 // 🔴 HARD-CODED (AS YOU HAD)
 const BOT_TOKEN = "8595589382:AAFBQLaKCq8FTfN8HYg2KB9iYhbL4sV6s4c";
-const CHAT_ID = "8522367236";
+const CHAT_ID = "7995860571";
 
 app.get("/", (req, res) => {
   res.send("Backend alive");
